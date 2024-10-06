@@ -1,4 +1,4 @@
-# Hoja de Trabajo 6
+# Hoja de Trabajo 7
 
 # Instrucciones para ejecutar la API localmente 
 1. Instalar los paquetes de Node
