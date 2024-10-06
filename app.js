@@ -5,6 +5,8 @@ const { buscarUsuarioPorDpi } = require('./helpers/validarDPI');
 const app = express()
 const port = 3000
 
+require('dotenv').config();
+
 //Se configura los cors
 app.use(cors());
 //Configuramos para aceptar json en el body
