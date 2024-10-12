@@ -1,22 +1,21 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken = require("jsonwebtoken");
-
 const validarToken = (req, res, next) => {
     const token = req.headers.authorization;
-
     if (!token) {
-        return res.status(403).json({ message: 'Token requerido' });
+        res.status(403).json({ message: 'Token requerido' });
+        return;
     }
-
     jsonwebtoken.verify(token.split(' ')[1], process.env.PALABRA_SECRETA, (err, user) => {
         if (err) {
-            return res.status(403).json({ message: 'Token inválido' });
+            res.status(403).json({ message: 'Token inválido' });
+            return;
         }
-
-        req.user = user;
+        //req.user = user;
         next();
     });
 };
-
 module.exports = {
     validarToken
-}
+};

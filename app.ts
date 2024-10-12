@@ -1,4 +1,6 @@
-const express = require('express');
+import { UsuarioType } from "./@types/types";
+
+import express, { Request, Response, } from 'express';
 const cors = require('cors')
 const { leerDB, guardarDB } = require('./helpers/guardarArchivo');
 const { buscarUsuarioPorDpi } = require('./helpers/validarDPI');
@@ -16,19 +18,20 @@ app.use(express.json());
 
 
 //Obtenemos lo usuarios del archivo ./db/usuarios.json
-const usuarios = leerDB();
+const usuarios: Array<UsuarioType> = leerDB();
 
 //Endpoint para obtener todos los usuario 
-app.get('/users', validarToken, (req, res) => {
+app.get('/users', validarToken, (req: Request, res: Response) => {
     res.json(usuarios)
 })
 
 //Endpoint para registrar nuevo usuario.
-app.post('/users', validarToken, (req, res) => {
-    const { dpi, name, email, password } = req.body;
+app.post('/users', validarToken, (req: Request, res: Response) => {
+    const { dpi, name, email, password }: UsuarioType = req.body;
 
     if (dpi == undefined || buscarUsuarioPorDpi(usuarios, dpi) != undefined) {
-        return res.status(400).send("El dpi no es válido.");
+        res.status(400).send("El dpi no es válido.");
+        return;
     }
 
     usuarios.push({ dpi, name, email, password });
@@ -38,21 +41,24 @@ app.post('/users', validarToken, (req, res) => {
 })
 
 //Endpoint para actualizar usuario.
-app.put('/users/:dpi', validarToken, (req, res) => {
+app.put('/users/:dpi', validarToken, (req: Request, res: Response) => {
     const { dpi } = req.params;
-    const { dpi: dpiBody, name, email, password } = req.body;
+    const { dpi: dpiBody, name, email, password } : UsuarioType = req.body;
 
     if (dpiBody != undefined) {
-        return res.status(400).send("No se puede modificar el DPI desde el Body.");
+        res.status(400).send("No se puede modificar el DPI desde el Body.");
+        return;
     }
 
     if (dpi == undefined) {
-        return res.status(400).send("El  DPI proporcionado en la URL no existe.");
+        res.status(400).send("El  DPI proporcionado en la URL no existe.");
+        return;
     }
 
     const usuarioABuscar = buscarUsuarioPorDpi(usuarios, dpi);
     if (dpi == undefined || usuarioABuscar == undefined) {
-        return res.status(400).send("El  DPI proporcionado en la URL no existe.");
+        res.status(400).send("El  DPI proporcionado en la URL no existe.");
+        return;
     }
 
     const nuevoUsuario = { dpi, name, email, password };
@@ -64,12 +70,13 @@ app.put('/users/:dpi', validarToken, (req, res) => {
 })
 
 //Endpoint para eliminar usuario.
-app.delete('/users/:dpi', validarToken, (req, res) => {
+app.delete('/users/:dpi', validarToken, (req: Request, res: Response) => {
     const { dpi } = req.params;
 
     const usuarioABuscar = buscarUsuarioPorDpi(usuarios, dpi);
     if (dpi == undefined || usuarioABuscar == undefined) {
-        return res.status(400).send("El  DPI proporcionado en la URL no existe.");
+        res.status(400).send("El  DPI proporcionado en la URL no existe.");
+        return;
     }
 
     const data = usuarios.filter(item => item.dpi !== dpi);
@@ -78,13 +85,14 @@ app.delete('/users/:dpi', validarToken, (req, res) => {
     res.status(200).send(`Usuario con DPI ${dpi} eliminado exitosamente`);
 })
 
-app.post('/users/login', (req, res) => {
+app.post('/users/login', (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    const usuario = usuarios.find(item => item.email == email && item.password == password );
+    const usuario = usuarios.find(item => item.email == email && item.password == password);
 
     if (!usuario) {
-        return res.status(401).json({ message: 'Credenciales inválidas' });
+        res.status(401).json({ message: 'Credenciales inválidas' });
+        return;
     }
 
     const token = jsonwebtoken.sign({ dpi: usuario.dpi, email: usuario.email }, process.env.PALABRA_SECRETA, {
